@@ -1,0 +1,91 @@
+---
+title: "ChIPSeq showcase"
+author: "tobiasst"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    code_folding: show
+    df_print: paged
+    toc: yes
+---
+
+```{r init, message=F, warning=F}
+
+library(HilbertVis)
+library(RColorBrewer)
+library(lattice)
+library(grid)
+library(ShortRead)
+library(rtracklayer)
+library(tsTools)
+library(TxDb.Dmelanogaster.UCSC.dm6.ensGene)
+seqlevelsStyle(TxDb.Dmelanogaster.UCSC.dm6.ensGene) <- "ensembl"
+
+```
+
+```{r}
+
+r.chr <- "X"
+r.start <- 11820000
+r.end <- 11870000
+
+samples <- c("SRR495368","SRR495378")
+
+```
+
+## coverage from bam
+
+Coverages are obtained by extending aligned reads to the average chromatin fragment size and
+calculating the number of fragments spanning each bp along the genome
+
+```{r, warning=F, message=F}
+
+covsl <- lapply(samples, function(sample) {
+  gr <- readGAlignments(paste0(sample,"_out/", sample, ".bam"))
+	grs <- as(gr, "GRanges")
+	grsr <- resize(grs, 150)
+	coverage(grsr)
+})
+names(covsl) <- c("IP", "input")
+
+```
+
+A representative region on chromosome X with IP and input ChIP seq signals.
+
+```{r, fig.width=6, fig.height=2.5}
+
+plotProfiles(r.start,r.end, r.chr, covsl, txdb = TxDb.Dmelanogaster.UCSC.dm6.ensGene,
+             ylims=list(c(0,300),c(0,300)), plot.labels = F,
+             cols = brewer.pal(8, "Paired")[4:3])
+
+```
+
+## coverage from deeptools bigwigs
+
+```{r, warning=F, message=F}
+
+dtcovsl <- lapply(samples, function(sample) {
+  granges <- import(paste0(sample,"_out/", sample, "_deeptools_1.bw"))
+  coverage(granges, weight = "score")
+})
+names(dtcovsl) <- c("IP", "input")
+
+```
+
+```{r, fig.width=6, fig.height=2.8}
+
+peaks <- import("peak_calls/SRR495368.bed")
+peaksf <- data.frame(peaks)[,1:3]
+colnames(peaksf)[1] <- "chr"
+
+ann <- list("Homer peaks"=data.frame(peaksf, col=c("blue")))
+
+
+plotProfiles(r.start,r.end, r.chr, dtcovsl, txdb = TxDb.Dmelanogaster.UCSC.dm6.ensGene,
+            ylims=list(c(0,70),c(0,70)), plot.labels = F,
+             cols = brewer.pal(8, "Paired")[4:3], ann=ann)
+
+```
+```{r}
+sessionInfo()
+```
