@@ -3,7 +3,7 @@
 Demonstration of Conda package management and Snakemake pipeline execution on HPC cluster.
 This pipeline will should also run on your workstation.
 
-Outline: One sample ChIP-Seq of MSL2 in Drosophila cell lines. Fetch data from SRA. Align the reads, call peaks, create a bigwig file for browsing and generate an HTML report from a Rmd script. 
+Outline: One sample ChIP-Seq of MSL2 in Drosophila cell lines. Fetch data from SRA. Align the reads, call peaks, create a bigwig file for browsing and generate an HTML report from a Rmd script.
 
 ### Prerequisites
 
@@ -26,6 +26,26 @@ Create the conda environment and activate it
 ```
 conda env create --name chipseq --file environment.yaml
 conda activate chipseq
+```
+
+Install a github R package:
+with the chipseq environment activated run R
+
+```
+R
+```
+
+within R execute
+
+```
+library(devtools)
+install_github("musikutiv/tsTools")
+```
+
+and quit the R session
+
+```
+q()
 ```
 
 ## Running the pipeline
