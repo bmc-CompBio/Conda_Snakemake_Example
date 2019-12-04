@@ -65,7 +65,7 @@ plotProfiles(r.start,r.end, r.chr, covsl, txdb = TxDb.Dmelanogaster.UCSC.dm6.ens
 ```{r, warning=F, message=F}
 
 dtcovsl <- lapply(samples, function(sample) {
-  granges <- import(paste0(sample,"_out/", sample, "_deeptools_1.bw"))
+  granges <- import(paste0(sample,"_out/", sample, "_deeptools.bw"))
   coverage(granges, weight = "score")
 })
 names(dtcovsl) <- c("IP", "input")
